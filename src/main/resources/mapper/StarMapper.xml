@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sonrisa.mapper.StarMapper">
+    <select id="queryStar" resultType="Star">
+        select * from star where user_id = #{userId} and article_id = #{articleId}
+    </select>
+
+    <insert id="addStar" parameterType="Star">
+        insert into star(user_id,article_id) values(#{userId},#{articleId})
+    </insert>
+
+    <delete id="delStar" parameterType="Star">
+        delete from star where user_id = #{userId} and article_id = #{articleId}
+    </delete>
+
+    <delete id="delStarByArticleId" parameterType="long">
+        delete from star where article_id = #{articleId}
+    </delete>
+</mapper>

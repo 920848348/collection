@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-cn" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+
+    <meta charset="UTF-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width,initial-scale=1" name="viewport">
+    <meta content="description" name="description">
+    <meta name="google" content="notranslate" />
+    <meta content="Mashup templates have been developped by Orson.io team" name="author">
+
+    <!-- Disable tap highlight on IE -->
+    <meta name="msapplication-tap-highlight" content="no">
+
+    <title>Sonrisa云收藏</title>
+    <link href="index/css/main.550dcf66.css" rel="stylesheet">
+</head>
+<body> <!-- Add your content of header -->
+<header>
+    <nav class="navbar navbar-default active">
+        <div class="container">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/" title="">
+                    <img src="/index/images/logo_min.png" height="60px" width="60px" class="navbar-logo-img">
+                </a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li shiro:notAuthenticated="">
+                        <p>
+                            <a href="/register" class="btn btn-default navbar-btn" title="">注册</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        </p>
+                    </li>
+                    <li shiro:notAuthenticated=""><p>
+                        <a href="/login" class="btn btn-default navbar-btn" title="">登录</a>
+                    </p>
+                    </li>
+                    <li shiro:Authenticated=""><p>
+                        <a href="/manager" class="btn btn-default navbar-btn" title="">收藏管理</a>
+                    </p>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<!-- Add your site or app content here -->
+<div class="hero-full-container background-image-container white-text-container">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <h1>Sonrisa云收藏</h1>
+                <br>
+                <p>帮您解决线上收藏的烦恼</p>
+                <br>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+        navbarFixedTopAnimation();
+    });
+</script>
+
+<footer class="footer-container white-text-container">
+    <div class="container">
+        <div class="row">
+
+
+            <div class="col-xs-12">
+                <h3>Sonrisa云收藏</h3>
+
+                <div class="row">
+                    <div class="col-xs-12 col-sm-7">
+                    </div>
+                    <div class="col-xs-12 col-sm-5">
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+        navActivePage();
+        scrollRevelation('.reveal');
+    });
+</script>
+
+<script type="text/javascript" src="index/js/main.0cf8b554.js"></script></body>
+</html>

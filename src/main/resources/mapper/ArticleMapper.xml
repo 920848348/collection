@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sonrisa.mapper.ArticleMapper">
+    <insert id="addArticle" parameterType="Article">
+        insert into article(id,title,url,description,like_total,collection_total,is_private,create_time) values(#{id},#{title},#{url},#{description},#{likeTotal},#{collectionTotal},#{isPrivate},#{createTime})
+    </insert>
+
+    <select id="getArticleByUserIdAndUrl" resultType="Article">
+        select article.* from profile,article where profile.user_id = #{userId} and profile.article_id = article.id and article.url = #{url}
+    </select>
+
+    <select id="getArticles" resultType="Article">
+        select * from article where is_Private = false
+    </select>
+
+    <select id="getOtherArticles" parameterType="long" resultType="Article">
+        select article.* from profile,article where profile.user_id != #{userId} and profile.article_id = article.id and article.is_private = false limit 0 , 15
+    </select>
+
+    <select id="queryUserArticles" parameterType="long" resultType="Article">
+        select article.* from profile,article where profile.user_id = #{userId} and profile.article_id = article.id and article.is_private = false
+    </select>
+
+    <select id="getArticlesByUserId" resultType="Article">
+        select article.* from article,profile where article.id = profile.article_id and profile.user_id = #{userId}
+    </select>
+
+    <update id="updateArticleLike" parameterType="Map">
+        update article set like_total = like_total + #{operator} where id = #{id}
+    </update>
+
+    <select id="getArticlesByFolderName" resultType="Article">
+        select article.* from folder,profile,article where
+        folder.name = #{folderName} and
+        folder.user_id = #{userId} and
+        profile.folder_id = folder.id and
+        article.id = profile.article_id
+        <if test="isPrivate == false">
+            and article.is_private = false
+        </if>
+    </select>
+
+    <delete id="deleteById" parameterType="long">
+        delete from article where id = #{id}
+    </delete>
+
+    <update id="updateArticle">
+        update article set article.title = #{title} , article.description = #{description} , article.is_private = #{isPrivate} where article.id = #{articleId}
+    </update>
+</mapper>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>[[#{register}]]</title>
+    <!-- Bootstrap core CSS -->
+    <link href="/index/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="/index/css/signin.css" rel="stylesheet">
+    <script src="/index/js/jquery-1.7.2.js"></script>
+    <script type="text/javascript">
+    </script>
+    <script type="text/javascript">
+        const post_ajax = function (url, username,password) {
+            const the_form = document.createElement("form");
+            the_form.action = url;
+            the_form.method = "post";
+            const opt1 = document.createElement("input");
+            const opt2 = document.createElement("input");
+            opt1.name = "username";
+            opt1.value = username;
+            opt2.name = "password";
+            opt2.value = password;
+            the_form.appendChild(opt1);
+            the_form.appendChild(opt2);
+            the_form.hidden = "hidden";
+            document.body.appendChild(the_form);
+            the_form.submit();
+        };
+        $(function () {
+            $("#sub-btn").click(function () {
+                const uPattern = /^([a-zA-Z\d])(\w|\-)+@[a-zA-Z\d]+\.[a-zA-Z]{2,4}$/;
+                const pPattern = /^.*(?=.{6,})(?=.*\d)(?=.*[a-z]).*$/;
+                if(uPattern.test($("#username").val()) && pPattern.test($("#password").val()) && $("#password").val() == $("#confirmPassword").val()){
+                    $.post("/isExistUsername","username=" + $("#username").val(),function (msg) {
+                        if(msg.register_msg == "passed"){
+                            post_ajax("/registerSuccess",$("#username").val(),$("#password").val());
+                        }else if(msg.register_msg == "wrong"){
+                            $("#error_username").html("[[#{error_usernameExist}]]");
+                        }
+                    },"json");
+                }
+                if(!uPattern.test($("#username").val())){
+                    $("#error_username").html("[[#{error_username}]]");
+                }else $("#error_username").html("");
+                if(!pPattern.test($("#password").val())){
+                    $("#error_password").html("[[#{error_password}]]");
+                }else $("#error_password").html("");
+                if($("#password").val() != $("#confirmPassword").val()){
+                    $("#error_confirm").html("[[#{error_confirm}]]");
+                }else $("#error_confirm").html("");
+            });
+        });
+    </script>
+</head>
+
+<body class="text-center">
+<form class="form-signin">
+    <img class="mb-4" src="/index/images/logo.png" alt="" width="100" height="100">
+    <h1 class="h3 mb-3 font-weight-normal">[[#{registerTitle }]]</h1>
+
+    <label for="username" class="text-info" style="float:left">[[#{username}]]</label>
+    <input type="text" class="form-control" th:placeholder="#{tip}" required="" name="username" id="username">
+    <label for="username" class="text-danger" style="float: top" id="error_username"></label>
+    <br>
+    <label for="password" class="text-info" style="float: left">[[#{newPassword}]]</label>
+    <input type="password" class="form-control" th:placeholder="#{password}" required="" name="password" id="password">
+    <label for="password" class="text-danger" style="float: top" id="error_password"></label>
+    <br>
+    <label for="confirmPassword" class="text-info" style="float:left">[[#{confirmPassword}]]</label>
+    <input type="password" class="form-control" th:placeholder="#{confirmPassword}" required="" id="confirmPassword">
+    <label for="confirmPassword" class="text-danger" style="float: top" id="error_confirm"></label><br>
+    <div class="pull-right">
+        <label>
+            <a class="text-muted" th:text="#{toLogin}" href="/login" style="font-size: larger;color: forestgreen"></a>
+        </label>
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="button" id="sub-btn">[[#{registerButton}]]</button>
+    <p id="login_error"  style="color: red"></p>
+    <a class="btn btn-sm" th:href="@{/register(lang='zh_CN')}" style="font-size: larger">中文</a>
+    <a class="btn btn-sm" th:href="@{/register(lang='en_US')}" style="font-size: larger">English</a>
+    <div id="error_login"></div>
+</form>
+</body>
+
+</html>

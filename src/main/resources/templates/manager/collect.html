@@ -1,0 +1,116 @@
+
+<!DOCTYPE html >
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="description" content="Bootstrap Admin App + jQuery"/>
+    <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin"/>
+    <title>Sonrisa云收藏 | 收藏页面</title>
+
+    <link rel="stylesheet" href="/index/css/font-awesome.css">
+    <link rel="stylesheet" href="/manager/css/simple-line-icons.css">
+    <link rel="stylesheet" href="/index/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/manager/css/app.css">
+    <link rel="stylesheet" href="/manager/css/layui.css">
+    <script type="text/javascript" src="/manager/js/layui.js"></script>
+    <script type="text/javascript" src="/index/js/jquery-1.7.2.js"></script>
+    <script type="text/javascript">
+        layui.use('form',function (){
+            const form = layui.form;
+            form.on('radio(checkradio)', function(data){
+                const $radio = $(data.elem);
+                if ($radio.data('waschecked') == true){
+                    $radio.prop('checked', false);
+                    $radio.data('waschecked', false);
+                } else {
+                    $radio.prop('checked', true);
+                    $radio.data('waschecked', true);
+                }
+                form.render("radio");
+            });
+            form.render();
+        });
+        $(function () {
+            const reg = /^\s*$/;
+            $("#collect").click(function () {
+                const f1 = $("#folder").val();
+                const f2 = $("#folderNew").val();
+                let des = $("#description").val().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                let tit =  $("#title").val().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                if(reg.test(f1) && reg.test(f2)) $("#error").text("请选择或新建一个文件夹");
+                else if(!reg.test(f1) && !reg.test(f2)) $("#error").text("只能保存到一个文件夹哦~");
+                else if(tit.length > 50) $("#error").text("收藏标题不可超过80字");
+                else if(des.length > 100) $("#error").text("收藏备注不可超过100字");
+                else{
+                    $("#error").text("");
+                    $(this).prop("disabled",true);
+                    $.post("/manager/saveArticle",$(".layui-form").serialize(),function (msg) {
+                        if(msg.rspCode == "100") window.location.href = "/manager";
+                        else if(msg.rspCode == "101" || msg.rspCode == "102" || msg.rspCode == "103"){
+                            $("#error").text(msg.rspMsg);
+                            setTimeout(function () {
+                                $("#collect").prop("disabled",false);
+                            },1800);
+                        }
+                        else window.location.href = "/500";
+                    });
+                }
+            });
+        });
+    </script>
+    <style type="text/css">
+        .layui-form-select dl { top: auto;bottom: 42px;max-height:188px; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="block-center mt-xl wd-xl" style="width: 385px;height: auto">
+        <div class="panel panel-flat" style="background-color: #F0F0F0">
+            <div class="panel-heading text-center" style="background-color: #1E9FFF">
+                <a href="/manager"><img src="/index/images/logo_min.png" height="60px" width="60px"></a>
+            </div>
+            <div class="panel-body">
+                <form id="collect-form" class="layui-form" onsubmit="return false">
+                    <div id="show1">
+                        <div class="media mb">
+                            <div class="media-body" lay-skin="">
+                                <h4 style="font-size: 19px;font-weight: bold;text-align: center"><a th:href="${url}" th:text="${title}" style="color: #656565"></a></h4>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="layui-bg-cyan">
+                    <div class="mb layui-icon layui-icon-edit" style="height: 20px;font-size: medium;color: #5FB878;font-weight: bold">收藏标题</div>
+                    <div class="mb">
+                        <input type="text" name="title" id="title" th:value="${title}" class="layui-input" placeholder="请输入标题"/>
+                    </div>
+                    <div class="mb layui-icon layui-icon-edit" style="height: 20px;font-size: medium;color: #5FB878;font-weight: bold">收藏备注</div>
+                    <div class="mb">
+                        <textarea style="border:0;border-radius:5px;background-color:white;width: 355px;height: 100px;padding: 10px;resize: none;" placeholder="请输入收藏备注" name="description" id="description"></textarea>
+                    </div>
+                    <div style="font-weight: bold;color: #01AAED">
+                        <input type="radio" id="radio" lay-filter="checkradio" name="isPrivate" title="私密收藏">
+                    </div>
+                    <div style="text-align: right;font-weight: bold;color: red;" id="error"></div>
+                    <p class="pt-lg text-center" style="font-weight: bold;color: #009688">选择一个收藏夹</p>
+                    <br>
+                    <p class="collect-sort-folder">
+                            <select name="folder" id="folder">
+                                <option value=""></option>
+                                <option th:each="x:${folders}" th:text="${x}" th:value="${x}"></option>
+                            </select>
+                    </p>
+                    <p class="pt-lg text-center" style="font-weight: bold;color: #009688">或新建一个文件夹</p><br>
+                    <input type="text" name="folderNew" id="folderNew" placeholder="请输入新文件夹名" autocomplete="off" class="layui-input">
+                    <br>
+                    <button id="collect" class="mt-lg btn btn-info btn-block">提交</button>
+                    <input type="hidden" name="url" id="url" th:value="${url}"/>
+                </form>
+                <p></p>
+                <div id="errorMsg" class="alert alert-danger text-center" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

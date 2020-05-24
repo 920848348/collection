@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>[[#{forgetTitle}]]</title>
+    <!-- Bootstrap core CSS -->
+    <link href="/index/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+
+    <link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">
+    <script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>
+
+    <link href="/index/css/signin.css" rel="stylesheet">
+    <script src="/index/js/jquery-1.7.2.js"></script>
+    <script src="/index/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+    </script>
+    <script type="text/javascript">
+        const post_ajax = function (url, username,password) {
+            const the_form = document.createElement("form");
+            the_form.action = url;
+            the_form.method = "post";
+            const opt1 = document.createElement("input");
+            const opt2 = document.createElement("input");
+            opt1.name = "username";
+            opt1.value = username;
+            opt2.name = "password";
+            opt2.value = password;
+            the_form.appendChild(opt1);
+            the_form.appendChild(opt2);
+            the_form.hidden = "hidden";
+            document.body.appendChild(the_form);
+            the_form.submit();
+        };
+        $(function () {
+            let q = false;
+            let s = "66666666";
+            let wait = 60;
+            let time = function($btn){
+                $btn.prop("disabled",true);
+                if(wait == 1){
+                    $("#time").text("");
+                    $btn.prop("disabled",false);
+                    wait = 60;
+                }else{
+                    wait --;
+                    $btn.prop("disabled",true);
+                    setTimeout(function () {
+                        time($btn);
+                    },1000);
+                    $("#time").text(wait);
+                }
+            }
+            $("#sendCode").click(function () {
+                const uPattern = /^([a-zA-Z\d])(\w|\-)+@[a-zA-Z\d]+\.[a-zA-Z]{2,4}$/;
+                if(!uPattern.test($("#username").val())){
+                    $("#error_username").html("[[#{error_username}]]");
+                }else {
+                    $("#error_username").html("");
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        data: {username: $("#username").val()},
+                        url: "/manager/getCode",
+                        success: function (msg) {
+                            if(msg.rspCode == "107") $("#error_code").text(msg.rspMsg);
+                            else if(msg.rspCode == "100"){
+                                q = true;
+                                s = msg.rspMsg;
+                            }
+                        }
+                    });
+                    time($(this));
+                }
+            });
+            $("#sub-btn").click(function () {
+                const uPattern = /^([a-zA-Z\d])(\w|\-)+@[a-zA-Z\d]+\.[a-zA-Z]{2,4}$/;
+                const pPattern = /^.*(?=.{6,})(?=.*\d)(?=.*[a-z]).*$/;
+                if(uPattern.test($("#username").val()) && pPattern.test($("#password").val()) && $("#password").val() == $("#confirmPassword").val() && q && $("#code").val() == s){
+                    $.ajax({
+                        async: false,
+                        type: "POST",
+                        dataType: "json",
+                        data: {username: $("#username").val(),password: $("#password").val()},
+                        url: "/safety/forgetPwd",
+                        success: function (msg) {
+                            if(msg.rspCode == "100"){
+                                swal({
+                                        title: "操作成功！",
+                                        text: "密码已重置",
+                                        type: "success",
+                                        showConfirmButton:"true",
+                                        confirmButtonText:"确定"},
+                                    function () {
+                                        window.location.href = "/login";
+                                    });
+                            }
+                        },
+                        error: function () {
+                            swal({
+                                    title: "操作失败！",
+                                    text: "密码重置失败",
+                                    type: "error",
+                                    showConfirmButton:"true",
+                                    confirmButtonText:"确定"},
+                                function () {
+                                    window.location.reload();
+                                });
+                        }
+                    });
+                }
+                if(!uPattern.test($("#username").val())){
+                    $("#error_username").html("[[#{error_username}]]");
+                }else $("#error_username").html("");
+                if(!pPattern.test($("#password").val())){
+                    $("#error_password").html("[[#{error_password}]]");
+                }else $("#error_password").html("");
+                if($("#password").val() != $("#confirmPassword").val()){
+                    $("#error_confirm").html("[[#{error_confirm}]]");
+                }else $("#error_confirm").html("");
+                if(!q || $("#code").val() != s){
+                    $("#error_code").html("[[#{error_code}]]");
+                }else $("#error_code").html("");
+            });
+        });
+    </script>
+</head>
+
+<body class="text-center">
+<form class="form-signin">
+    <img class="mb-4" src="/index/images/logo.png" alt="" width="100" height="100">
+    <h1 class="h3 mb-3 font-weight-normal">[[#{forgetTitle }]]</h1>
+
+    <label for="username" class="text-info" style="float:left">[[#{username}]]</label>
+    <input type="text" class="form-control" th:placeholder="#{username}" required="" name="username" id="username">
+    <label for="username" class="text-danger" style="float: top" id="error_username"></label>
+    <br>
+    <div class="row">
+        <div class="col-md-7">
+            <label for="code" class="text-info" style="float: left">[[#{theCode}]]</label>
+            <input type="text" class="form-control" th:placeholder="#{theCode}" required="" name="code" id="code">
+            <label for="code" class="text-danger" style="float: top" id="error_code"></label>
+        </div>
+        <div class="col-md-4" style="padding-top: 26px;padding-left: inherit">
+            <button id="sendCode" type="button" class="btn btn-info" style="font-size: 19px">发送验证码</button>
+            <label style="text-align: center" id="time"></label>
+        </div>
+    </div>
+    <label for="password" class="text-info" style="float: left">[[#{newPassword}]]</label>
+    <input type="password" class="form-control" th:placeholder="#{newPassword}" required="" name="password" id="password">
+    <label for="password" class="text-danger" style="float: top" id="error_password"></label>
+    <br>
+    <label for="confirmPassword" class="text-info" style="float:left">[[#{confirmPassword}]]</label>
+    <input type="password" class="form-control" th:placeholder="#{confirmPassword}" required="" id="confirmPassword">
+    <label for="confirmPassword" class="text-danger" style="float: top" id="error_confirm"></label><br>
+    <button class="btn btn-lg btn-primary btn-block" type="button" id="sub-btn">[[#{forgetButton}]]</button>
+    <p id="login_error"  style="color: red"></p>
+    <a class="btn btn-sm" th:href="@{/register(lang='zh_CN')}" style="font-size: larger">中文</a>
+    <a class="btn btn-sm" th:href="@{/register(lang='en_US')}" style="font-size: larger">English</a>
+    <div id="error_login"></div>
+</form>
+</body>
+
+</html>

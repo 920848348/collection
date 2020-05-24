@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改密码</title>
+    <link href="/user/css/my.css" rel="stylesheet">
+    <link href="/index/css/bootstrap.min.css" rel="stylesheet">
+    <script src="/index/js/jquery-1.7.2.js"></script>
+    <style type="text/css">
+        .center-in-center{
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            -webkit-transform: translate(-50%, -50%);
+            -moz-transform: translate(-50%, -50%);
+            -ms-transform: translate(-50%, -50%);
+            -o-transform: translate(-50%, -50%);
+            transform: translate(-50%, -50%);
+        }
+        input{
+            width: 320px;
+        }
+        .button{
+            display:block;
+            margin:0 auto;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            const pPattern = /^.*(?=.{6,})(?=.*\d)(?=.*[a-z]).*$/;
+            $(".btn").click(function () {
+                $(this).prop("disabled",true);
+                const $nPwd = $(this).parent().parent().find("p:eq(1)").find("input");
+                if(!pPattern.test($nPwd.val())) $("#error").html("<div class=\"alert alert-warning\" role=\"alert\"><strong>新密码错误</strong>&nbsp;&nbsp;至少6位且至少包括一个英文字母</div>");
+                else{
+                    $("#error").html("");
+                    const $oPwd = $(this).parent().parent().find("p:eq(0)").find("input");
+                    $.post("/safety/isCorrectPwd","password=" + $oPwd.val(),function (msg) {
+                        if(msg == "passed"){
+                            $.post("/safety/changePwd","newPassword=" + $nPwd.val(),function (msg) {
+                                window.top.location.href = "/login";
+                            }).error(function () {
+                                window.top.location.href = "/500";
+                            });
+                        }
+                        else if(msg == "wrong") $("#error").html("<div class=\"alert alert-warning\" role=\"alert\"><strong>原密码错误</strong></div>");
+                    }).error(function () {
+                        window.top.location.href = "/500";
+                    });
+                }
+                setTimeout(function () {
+                    $(".btn").prop("disabled",false);
+                },1200);
+            });
+        });
+    </script>
+</head>
+<body class="center-in-center" style="background-color: whitesmoke">
+<div id="error"></div>
+        <p><input type="password" placeholder="请输入原密码"></p>
+        <p><input type="password" placeholder="请输入新密码"></p>
+        <p><button class="button btn btn-info btn-md" role="button">更改密码</button></p>
+</body>
+</html>

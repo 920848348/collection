@@ -1,0 +1,62 @@
+spring:
+    datasource:
+        username: root
+        password: root
+        url: jdbc:mysql://localhost:3306/collection?serverTimezone=UTC&useUncide=true&characterEncoding=utf-8&useSSL=true
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        type: com.alibaba.druid.pool.DruidDataSource
+
+        # 初始化大小，最小，最大
+        initialSize: 5
+        minIdle: 5
+        maxActive: 20
+        # 配置获取连接等待超时的时间(毫秒)
+        maxWait: 60000
+        # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+        timeBetweenEvictionRunsMillis: 60000
+        # 配置有一个连接在连接池中的最小生存时间，单位是毫秒
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        # 打开PSCache，指定每个连接上PSCache的大小
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        # 配置监控统计拦截的filters，去掉后监控界面sql将无法统计，'wall'用于防火墙
+        filters: stat
+        # 通过connectProperties属性来打开mergeSql功能，慢SQL记录
+        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=2000
+
+#   关闭thymeleaf缓存
+    thymeleaf:
+        cache: false
+
+#    i18n
+    messages:
+        basename: i18n.login
+        encoding: utf-8
+
+    mail:
+        host: smtp.qq.com
+        username: sonrisa_collection@qq.com
+        password: pvpvptbsyhkqdfch
+        port: 465
+        protocol: smtp
+        default-encoding: UTF-8
+        properties:
+            mail.smtp.ssl.enable: true
+            mail.smtp.socketFactory.port: 465
+            mail.smtp.socketFactory.class: javax.net.ssl.SSLSocketFactory
+
+server:
+    port: 8080
+mybatis:
+    mapper-locations: "classpath:mapper/*.xml"
+    type-aliases-package: cn.sonrisa.pojo
+    configuration:
+        map-underscore-to-camel-case: true #开启驼峰命名
+
+staticPath: "F:\\pictures\\"
+mavenPath: "/images/"
+commonHeadPortraitPath: "F:\\pictures\\1\\user.png"

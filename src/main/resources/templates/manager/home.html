@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">
+    <script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>
+
+    <link href="/manager/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/manager/css/templatemo-style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/manager/css/simple-line-icons.css">
+    <link rel="stylesheet" href="/index/css/font-awesome.css">
+    <link href="/manager/css/layui.css" rel="stylesheet">
+    <link href="/toastr/toastr.min.css" rel="stylesheet">
+    <script src="/index/js/jquery-1.7.2.js"></script>
+    <script src="/index/js/bootstrap.min.js"></script>
+    <script src="/toastr/toastr.min.js"></script>
+    <style type="text/css">
+        .modal-open{
+            overflow-y: hidden;
+        }
+        body{
+            background-color: ghostwhite;
+        }
+        a:link,a:visited{
+            color: #000080;
+            text-decoration:none;
+        }
+        a:hover {
+            color: #FF5722;
+            text-decoration:none;
+        }
+        a{
+            font-weight: bold;
+            font-size: 23px;
+        }
+        .Border{
+            border:1px solid #92B0DD;
+        }
+        p{
+            color: #656565;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            $(".star").click(function () {
+                const $btn = $(this);
+                const $load = $(this).parent().find("span:eq(0)");
+                $load.prop("hidden",false);
+                $btn.prop("disabled",true);
+                const $form = $btn.parent().parent().find("form:eq(0)");
+                let $status = $btn.find("span:eq(0)");
+                let $star = $btn.find("span:eq(1)");
+                if($status.attr("class") == "layui-icon layui-icon-rate"){
+                    $.post("/manager/getStar",$form.serialize(),function (msg) {
+                        setTimeout(function () {
+                            let $count = $star.text();
+                            $count++;
+                            $star.text($count);
+                            $status.attr("class","layui-icon layui-icon-rate-solid");
+                            $load.prop("hidden",true);
+                            $btn.prop("disabled",false);
+                        },600);
+                    }).error(function () {
+                        window.location.reload();
+                    });
+                }else{
+                    $.post("/manager/loseStar",$form.serialize(),function (msg) {
+                        setTimeout(function () {
+                            let $count = $star.text();
+                            $count--;
+                            $star.text($count);
+                            $status.attr("class","layui-icon layui-icon-rate");
+                            $load.prop("hidden",true);
+                            $btn.prop("disabled",false);
+                        },600);
+                    }).error(function () {
+                        window.location.reload();
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<br><br>
+<div class="row tm-section-mb">
+    <div class="col-lg-12">
+        <div th:if="${articles.size() == 0}" style="text-align: center;">
+            <h2 style="color: black;" class="text-thin">您暂未收藏</h2><br>
+            <p style="font-size: 18px;color: #656565">倘若您是第一次使用，需要先安装收藏工具。</p><br>
+            <p><button style="font-weight: normal" class="btn btn-outline-success btn-md" lay-href="/manager/tool">开始使用</button></p>
+        </div>
+        <div class="tm-timeline-item" th:each="article,x:${articles}">
+            <div class="tm-timeline-connector-vertical" th:if="${x.index != 0}"></div>
+            <div class="tm-timeline-item-inner">
+                <img th:src="${portraitPath}" alt="Image" class="rounded-circle tm-img-timeline">
+                <div class="tm-timeline-connector">
+                    <p class="mb-0">&nbsp;</p>
+                </div>
+                <div class="Border tm-timeline-description" style="width: 1000px;background-color: white;">
+                    <div class="float-right">
+                        <span data-toggle="modal" data-target="#modal-config" style="color: green;cursor:pointer" class="fa fa-cog go fa-2x fa-fw fa-pulse" aria-hidden="true"></span>
+                    </div>
+                    <a th:text="${article.title}" th:href="${article.url}" target="_blank"></a>
+                    <span th:if="${article.isPrivate()}" style="color: #BA55D3;font-size: 20px;font-weight: bold" class="layui-icon layui-icon-password"></span><br><br>
+                    <p th:text="${article.description}"></p><br>
+                    <p class="tm-text-green float-right mb-0" th:text="${article.myDate.year} + ' ' + ${article.myDate.mouth} + ' ' + ${article.myDate.day}"></p>
+                    <br><br>
+                    <p class="float-left mb-0">
+                        <span class="icon-folder" style="font-weight: bold;font-size: 20px;vertical-align: middle"></span>
+                        <span style="vertical-align: middle"><a href="" th:text="${foldersName.get(x.index)}" th:lay-href="'/manager/openFolder/' + ${foldersName.get(x.index)}" style="font-size: 15px;font-weight: bolder"></a></span>
+                    </p>
+                    <br><br>
+                    <p class="float-right mb-0" style="color: blueviolet;font-weight: bold">
+                        <span class="layui-icon layui-icon-loading-1 layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 20px;font-weight: bold;color: red" hidden></span>
+                        <button type="button" class="btn star btn-outline-info btn-md">
+                            <span th:class="${isStars.get(x.index) ? 'layui-icon layui-icon-rate-solid' : 'layui-icon layui-icon-rate'}" aria-hidden="true" style="color: black">Star</span>&nbsp;
+                            <span style="color: blueviolet" th:text="${article.likeTotal}"></span>
+                        </button>
+                    </p>
+                    <form>
+                        <input name="nickname" th:value="${nickname}" hidden>
+                        <input name="url" th:value="${article.url}" hidden>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal hide fade" id="modal-config" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span style="color: black;" class="fa fa-cog fa-2x fa-fw fa-spin"></span>
+                <button type="button" class="close" data-dismiss="modal" style="outline:none;">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button id="edit" style="width: 190px" class="btn btn-outline-info btn-md mt-lg" data-toggle="modal" data-target="#modal-edit">
+                    <i style="color: yellowgreen" class="fa fa-paint-brush fa-lg fa-fw"></i>
+                    修改收藏信息
+                </button>&nbsp;&nbsp;
+                <button id="del" style="width: 190px" class="btn btn-outline-danger btn-md mt-lg">
+                    <i style="color: red" class="fa fa-trash-o fa-lg fa-fw"></i>
+                    删除收藏
+                </button>
+                &nbsp;&nbsp;<button class="btn btn-outline-secondary btn-md mt-lg" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+    <form id="collection" target="myIframe" method="post">
+        <input name="url" hidden>
+        <input name="title" hidden>
+        <input name="description" hidden>
+        <input name="folderName" hidden>
+        <input name="isPrivate" hidden>
+    </form>
+</div>
+
+<div class="modal hide fade" id="modal-edit" tabindex="-1" role="dialog" >
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span style="color: black;" class="fa fa-cog fa-2x fa-fw fa-spin"></span>
+                <button type="button" class="close" data-dismiss="modal" style="outline:none;">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 505px">
+                <iframe id="myIframe" name="myIframe" width="100%" height="100%" frameborder="0" scrolling="no" allowtransparency="yes"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+        $("#edit").click(function () {
+            $("#collection").attr("action","/safety/editCollection");
+            $("#collection").submit();
+            $("#modal-config").modal('toggle');
+        });
+        $("#del").click(function () {
+            swal({
+                    title: "确认删除？",
+                    text: "一旦删除，该收藏将无法找回",
+                    type: "warning",
+                    showConfirmButton:"true",
+                    confirmButtonText:"确定",
+                    showCancelButton: "true",
+                    cancelButtonText:"取消"
+                },
+                function () {
+                    $.ajax({
+                        async: false,
+                        type: "POST",
+                        dataType: "json",
+                        data: $("#collection").serialize(),
+                        url: "/safety/delCollection",
+                        success: function () {
+                            window.parent.location.reload();
+                        },
+                        error: function () {
+                          window.top.location.href = "/500";
+                        }
+                    });
+                });
+        });
+        $(".go").click(function () {
+            let $this = $(this);
+            $.ajax({
+                async: false,
+                type: "POST",
+                dataType: "json",
+                url: "/safety/getArticle",
+                data: {
+                    url: $this.parent().parent().find("input[name = 'url']").val()
+                },
+                success: function (msg) {
+                    if(msg.rspCode == "104") {
+                        swal({
+                                title: "操作失败！",
+                                text: "该文章已经不存在",
+                                type: "error",
+                                showConfirmButton:"true",
+                                confirmButtonText:"确定"},
+                            function () {
+                                window.location.reload();
+                            });
+                    }
+                    $("#collection").find("input[name = url]").val(msg.url);
+                    $("#collection").find("input[name = title]").val(msg.title);
+                    $("#collection").find("input[name = description]").val(msg.description);
+                    $("#collection").find("input[name = folderName]").val(msg.folderName);
+                    $("#collection").find("input[name = isPrivate]").val(msg.isPrivate);
+                },
+                error: function () {
+                    window.top.location.reload();
+                }
+            });
+        });
+    });
+</script>
+
+<script src="/manager/js/layui.js"></script>
+<script>
+    document.onselectstart= function(event){return false;};
+    layui.config({
+        base: '/manager/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use('index');
+</script>
+</body>
+</html>

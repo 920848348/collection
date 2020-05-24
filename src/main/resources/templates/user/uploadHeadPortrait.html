@@ -1,0 +1,199 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"></meta>
+    <link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">
+    <script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>
+
+    <link rel="stylesheet" href="/index/css/font-awesome.css">
+    <link rel="stylesheet" href="/manager/css/app.css">
+    <link rel="stylesheet" href="/index/css/main.css">
+    <link rel="stylesheet" href="/index/css/normalize.css">
+    <link rel="stylesheet" href="/index/css/default.css">
+    <link rel="stylesheet" href="/toastr/toastr.min.css"/>
+    <link rel="stylesheet" href="/index/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/cropper/cropper.min.css">
+    <script src="/index/js/jquery-1.7.2.js"></script>
+    <script src="/index/js/bootstrap.min.js"></script>
+    <script src="/toastr/toastr.min.js"></script>
+    <script src="/manager/js/my.js"></script>
+</head>
+<body style="background-color: #f5f7fa">
+<div style="padding: 18px;background-color: white;">
+    <h4 style="color: #0b3275;">上传头像</h4>
+</div><br>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-4 col-md-4">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h4 style="text-align: center">请先选择一张图片</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <input id="cropper-file" type="file" class="form-control" style="position: absolute; clip: rect(0px, 0px, 0px, 0px);"/>
+                        <div class="bootstrap-filestyle input-group">
+                            <input style="height: 36px" id="cropper-file-url" type="text" class="form-control" disabled=""/>
+                            <span class="group-span-filestyle input-group-btn">
+                                    <label for="cropper-file" class="btn btn-default btn-lg">
+                                       <span class="fa fa-folder-open text-muted"></span>
+                                    </label>
+                                 </span>
+                        </div>
+                    </div>
+                    <br />
+                    <div id="cropper-preview" class="cropper-preview" data-text="截取的图像" style="font-size: 18px"></div>
+                </div>
+            </div>
+            <button id="cropper-submit" class="btn btn-primary btn-block" disabled="disabled" type="submit">提交</button>
+        </div>
+
+        <div class="col-lg-8 col-md-8">
+            <div class="panel">
+                <div class="panel-body">
+                    <div class="cropper-area">
+                        <img id="cropper-image" src="" alt=""/></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<!--<script src="/index/js/main.js"></script>-->
+<script src="/cropper/cropper.min.js"></script>
+<script>
+    $(function () {
+        let $cropperImage = $('#cropper-image');
+        let $cropperFile = $('#cropper-file');
+        let $cropperFileUrl = $('#cropper-file-url');
+        let $cropperSubmit = $('#cropper-submit');
+        let $cropperPreview = $('.cropper-preview');
+        let URL = window.URL || window.webkitURL;
+        let blobURL;
+        let croppable = false;
+
+        $cropperImage.cropper({
+            aspectRatio: 1 / 1,
+            viewMode: 1,
+            preview: $cropperPreview,
+            background: false,
+            mouseWheelZoom: false,
+            built: function () {
+                croppable = true;
+            }
+        });
+
+        function getrectangleCanvas(sourceCanvas){
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            var width = 250;
+            var height = 250;
+
+            canvas.width = width;
+            canvas.height = height;
+            context.beginPath();
+            context.rect(0, 0, width, height);
+            context.strokeStyle = 'rgba(0,0,0,0)';
+            context.stroke();
+            context.clip();
+            context.drawImage(sourceCanvas, 0, 0, width, height);
+
+            return canvas;
+        }
+
+        if(URL){
+            $cropperFile.change(function(){
+                var files = this.files;
+                var file;
+                if(!$cropperImage.data('cropper')){
+                    return;
+                }
+                if(files && files.length){
+                    file = files[0];
+                    if(/^image\/\w+$/.test(file.type)){
+                        blobURL = URL.createObjectURL(file);
+                        $cropperFileUrl.val($cropperFile.val());
+                        $cropperSubmit.prop('disabled', false);
+                        $cropperImage.one('built.cropper', function(){
+                            URL.revokeObjectURL(blobURL);
+                        }).cropper('reset').cropper('replace', blobURL);
+                        $cropperFile.val('');
+                    }else{
+                        swal({
+                            title: "请选择图片文件！",
+                            type: "error",
+                            showConfirmButton:"true",
+                            confirmButtonText:"确定"
+                        })
+                    }
+                }
+            });
+        }else{
+            $cropperFile.prop('disabled', true);
+        }
+
+        $cropperSubmit.on('click', function(){
+            var croppedCanvas;
+            var rectangleCanvas;
+            if(!croppable){
+                return;
+            }
+            croppedCanvas = $cropperImage.cropper('getCroppedCanvas');
+            rectangleCanvas = getrectangleCanvas(croppedCanvas);
+            var dataUrl = rectangleCanvas.toDataURL("image/png").replace(/\+/g,'%2B');
+            $.ajax({
+                url : '/safety/uploadHeadPortrait',
+                data : 'dataUrl='+dataUrl,
+                async:  false,
+                type : 'POST',
+                dataType : "json",
+                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                },
+                success: function(response){
+                    if(response.rspCode == "100"){
+                        $("#leftProfilePicture").attr("src",response.data);
+                        $cropperFile.prop('disabled', true);
+                        $cropperSubmit.prop('disabled', true);
+                        $(".cropper-area .cropper-container").hide();
+                        $.ajax({
+                            async: false,
+                            type: "POST",
+                            url: "/manager/getPortraitPath",
+                            success: function (path) {
+                                let $portrait = $(window.parent.document.getElementById("portrait"));
+                                $portrait.attr("src",path);
+                            },
+                            error: function () {
+                                window.top.location.href = "/400";
+                            }
+                        });
+                        swal({
+                                title: "操作成功！",
+                                text: "头像上传成功",
+                                type: "success",
+                                showConfirmButton:"true",
+                                confirmButtonText:"确定"},
+                            function () {
+                                window.location.reload();
+                            });
+                    }else{
+                        swal({
+                                title: "操作失败！",
+                                text: "头像上传失败",
+                                type: "error",
+                                showConfirmButton:"true",
+                                confirmButtonText:"确定"},
+                            function () {
+                                window.top.location.reload();
+                            });
+                    }
+                },
+                error: function(XmlHttpRequest, textStatus, errorThrown){
+                    console.log(XMLHttpRequest);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                }
+            });
+        });
+    });
+</script>
+</html>

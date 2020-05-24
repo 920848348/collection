@@ -1,0 +1,140 @@
+<!DOCTYPE html >
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta name="description" content="Bootstrap Admin App + jQuery"/>
+    <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin"/>
+
+    <style type="text/css">
+    </style>
+    <title>Sonrisa云收藏 | 收藏页面</title>
+
+    <link rel="stylesheet" href="/index/css/font-awesome.css">
+    <link rel="stylesheet" href="/manager/css/simple-line-icons.css">
+    <link rel="stylesheet" href="/index/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/manager/css/app.css">
+    <link rel="stylesheet" href="/manager/css/layui.css">
+    <script src="/index/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/manager/js/layui.js"></script>
+    <script type="text/javascript" src="/index/js/jquery-1.7.2.js"></script>
+    <script type="text/javascript">
+
+        layui.use('form',function () {
+            const form = layui.form;
+            let s = 0;
+            form.on('radio(checkradio)', function(data){
+                const $radio = $(data.elem);
+                s++;
+                if(s == 2) $radio.attr("title","私密收藏");
+                if ($radio.data('waschecked') == true){
+                    $radio.prop('checked', false);
+                    $radio.data('waschecked', false);
+                } else {
+                    $radio.prop('checked', true);
+                    $radio.data('waschecked', true);
+                }
+                form.render("radio");
+            });
+            form.render();
+        });
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">
+    <script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            const reg = /^\s*$/;
+            $("#collect").click(function () {
+                let des = $("#description").val().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                let tit = $("#title").val().replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+                if(tit.length > 80) $("#error").text("收藏标题不可超过80字");
+                else if(des.length > 100) $("#error").text("收藏备注不可超过100字");
+                else{
+                    $("#error").text("");
+                    $(this).prop("disabled",true);
+                    $.post("/safety/changeCollection",$(".layui-form").serialize(),function (msg) {
+                        if(msg.rspCode == "100"){
+                            $(window.parent.document.getElementById("modal-edit")).find("button").click();
+                            window.parent.swal({
+                                    title: "操作成功！",
+                                    text: "收藏信息更新成功",
+                                    type: "success",
+                                    showConfirmButton:"true",
+                                    confirmButtonText:"确定"},
+                                function () {
+                                    window.parent.location.reload();
+                                });
+                        }
+                        else if(msg.rspCode == "102"){
+                            window.parent.swal({
+                                    title: "操作失败！",
+                                    text: "收藏夹不存在",
+                                    type: "error",
+                                    showConfirmButton:"true",
+                                    confirmButtonText:"确定"},
+                                function () {
+                                    window.location.reload();
+                                });
+                        }
+                        else if(msg.rspCode == "104"){
+                            window.parent.swal({
+                                    title: "操作失败！",
+                                    text: "该文章已经不存在",
+                                    type: "error",
+                                    showConfirmButton:"true",
+                                    confirmButtonText:"确定"},
+                                function () {
+                                    window.parent.location.reload();
+                                });
+                        }
+                        else window.top.location.href = "/400";
+                    });
+                }
+            });
+        });
+    </script>
+
+    <style type="text/css">
+        .layui-form-select dl { top: auto;bottom: 42px;max-height:188px; }
+    </style>
+</head>
+<body>
+<div class="wrapper" style="background-color: #f0f0f0">
+    <div class="block-center mt-xl wd-xl" style="width: 385px;height: auto">
+        <div class="panel panel-flat" style="background-color: #f0f0f0">
+            <div class="panel-body">
+                <form id="collect-form" class="layui-form" onsubmit="return false">
+                    <div class="mb layui-icon layui-icon-edit" style="height: 20px;font-size: medium;color: #5FB878;font-weight: bold">收藏标题</div>
+                    <div class="mb">
+                        <input type="text" name="title" id="title" th:value="${title}" class="layui-input" placeholder="请输入标题"/>
+                    </div>
+                    <div class="mb layui-icon layui-icon-edit" style="height: 20px;font-size: medium;color: #5FB878;font-weight: bold">收藏备注</div>
+                    <div class="mb">
+                        <textarea style="border:0;border-radius:5px;background-color:white;width: 355px;height: 100px;padding: 10px;resize: none;" placeholder="请输入收藏备注" name="description" th:text="${description}" id="description"></textarea>
+                    </div>
+                    <div style="font-weight: bold;color: #01AAED">
+                        <input th:if="${isPrivate == 'yes'}" type="radio" lay-filter="checkradio" name="isPrivate" title="私密收藏(点两次取消哦~)" checked="checked">
+                        <input th:if="${isPrivate == 'no'}" type="radio" lay-filter="checkradio" name="isPrivate" title="私密收藏">
+                    </div>
+                    <div style="text-align: right;font-weight: bold;color: red;" id="error"></div>
+                    <p class="pt-lg text-center" style="font-weight: bold;color: #009688">选择一个收藏夹</p>
+                    <br>
+                    <p class="collect-sort-folder">
+                        <select name="folder" id="folder">
+                            <option th:text="${folderName}" th:value="${folderName}"></option>
+                            <option th:each="x:${folders}" th:text="${x}" th:value="${x}"></option>
+                        </select>
+                    </p>
+                        <input name="url" th:value="${url}" hidden>
+                    <br>
+                    <button id="collect" class="mt-lg btn btn-info btn-block">提交</button>
+                </form>
+                <p></p>
+                <div id="errorMsg" class="alert alert-danger text-center" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

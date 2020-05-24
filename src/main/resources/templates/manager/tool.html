@@ -1,0 +1,20 @@
+<html xmlns:th="http://www.thymeleaf.org" >
+<link rel="stylesheet" href="/manager/css/layui.css">
+  <body style="background-color: ghostwhite">
+        <div class="content-wrapper"><br>
+            <h2>网页收集工具</h2><br>
+            <div>
+                 该工具会存在于您的浏览器书签栏上，
+                 推荐使用 Chrome 谷歌浏览器&nbsp;
+                 <a target="_blank" href="https://www.google.cn/intl/zh-CN/chrome/" class="layui-btn layui-btn-radius layui-btn-normal">前往下载</a>
+            </div><br>
+            <div>
+	            <a th:href="@{${path}}" onclick="alert('请把这个按钮拖到您的浏览器书签栏'); return false;" class="layui-btn layui-btn-radius layui-btn-danger">云收藏</a>
+	            <span>(将该按钮拖动至浏览器书签栏,如下图)</span>
+            </div>
+         </div>
+         <div class="text-center">
+	       <img th:src="@{/manager/images/useTool.gif}"  alt=""/>
+         </div>
+  </body>
+</html>

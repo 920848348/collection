@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sonrisa.mapper.ProfileMapper">
+    <insert id="addProfile" parameterType="Profile">
+        insert into profile(user_id,article_id,folder_id)
+        values(#{userId},#{articleId},#{folderId})
+    </insert>
+
+    <select id="queryProfile" parameterType="Map" resultType="Profile">
+        select profile.* from profile,article where article.url = #{url}
+        and profile.article_id = article.id and profile.user_id = #{userId}
+    </select>
+
+    <select id="queryProfileById" parameterType="long" resultType="Profile">
+        select * from profile where article_id = #{articleId}
+    </select>
+    
+    <update id="updateProfile" parameterType="Profile">
+        update profile set folder_id = #{folderId}
+        where user_id = #{userId} and article_id = #{articleId}
+    </update>
+
+    <delete id="deleteProfile" parameterType="int">
+        delete from profile where folder_id = #{folderId}
+    </delete>
+
+    <delete id="deleteProfileByArticleId" parameterType="long">
+        delete from profile where profile.article_id = #{articleId}
+    </delete>
+
+    <select id="queryProfileByFolderId" parameterType="int" resultType="Profile">
+        select * from profile where folder_id = #{folderId}
+    </select>
+
+    <update id="updateFolderId">
+        update profile,article set profile.folder_id = #{folderId} where profile.article_id = article.id and article.id = #{articleId}
+    </update>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sonrisa.mapper.FolderMapper">
+    <select id="getFolderById" parameterType="int" resultType="Folder">
+        select * from folder where id = #{id}
+    </select>
+
+    <insert id="addFolder" parameterType="Folder">
+        insert into folder(user_id,name) values(#{userId},#{name})
+    </insert>
+
+    <select id="getRealFoldersByUserId" parameterType="long" resultType="Folder">
+        select * from folder where user_id = #{userId} and name != '未分类'
+    </select>
+
+    <select id="getFoldersByUserId" parameterType="long" resultType="Folder">
+        select * from folder where user_id = #{userId}
+    </select>
+
+    <select id="getFoldersByUserIdNotId" parameterType="long" resultType="Folder">
+        select id,name from folder where user_id = #{userId}
+    </select>
+
+    <select id="getFoldersNameByUserId" parameterType="long" resultType="String">
+        select name from folder where user_id = #{userId}
+    </select>
+
+    <select id="getRealFoldersNameByUserId" parameterType="long" resultType="String">
+        select name from folder where user_id = #{userId} and name != '未分类'
+    </select>
+
+    <select id="getIdByUserIdAndName" parameterType="Folder" resultType="int">
+        select id from folder where user_id = #{userId} and name = #{name}
+    </select>
+
+    <select id="queryFolderByUserIdAndName" parameterType="Map" resultType="Folder">
+        select * from folder where user_id = #{userId} and name = #{folderName}
+    </select>
+
+    <update id="updateFolderName">
+        update folder set name = #{newName} where user_id = #{userId} and name = #{oldName}
+    </update>
+
+    <delete id="deleteFolder" parameterType="int">
+        delete from folder where id = #{folderId}
+    </delete>
+
+    <select id="queryFolderByArticleId" parameterType="long" resultType="Folder">
+        select folder.* from folder,article,profile where folder.id = profile.folder_id and profile.article_id = article.id and article.id = #{articleId}
+    </select>
+</mapper>

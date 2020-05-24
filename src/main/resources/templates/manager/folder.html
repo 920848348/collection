@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">
+    <script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>
+
+    <link rel="stylesheet" href="/index/css/font-awesome.css">
+    <link href="/manager/css/templatemo-style.css" rel="stylesheet" />
+    <link href="/user/css/my.css" rel="stylesheet">
+    <link href="/manager/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/manager/css/templatemo-style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/manager/css/simple-line-icons.css">
+    <link href="/manager/css/layui.css" rel="stylesheet">
+    <script src="/index/js/jquery-1.7.2.js"></script>
+    <script src="/index/js/bootstrap.min.js"></script>
+    <style type="text/css">
+        body{
+            background-color: ghostwhite;
+        }
+        a:link,a:visited{
+            color: #000080;
+            text-decoration:none;
+        }
+        a:hover {
+            color: #FF5722;
+            text-decoration:none;
+        }
+        a{
+            font-weight: bold;
+            font-size: 23px;
+        }
+        .Border{
+            border:1px solid #92B0DD;
+        }
+        p{
+            color: #656565;
+        }
+        input{
+            width: 464px;
+            height: 36px;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            document.onselectstart= function(event){return false;};
+            $(".submit").click(function () {
+                const $btn = $(this);
+                const $load = $(this).parent().find("span:eq(0)");
+                $load.prop("hidden",false);
+                $btn.prop("disabled",true);
+                const $form = $btn.parent().parent().find("form:eq(0)");
+                let $status = $btn.find("span:eq(0)");
+                let $star = $btn.find("span:eq(1)");
+                if($status.attr("class") == "layui-icon layui-icon-rate"){
+                    $.post("/manager/getStar",$form.serialize(),function (msg) {
+                        if(msg.rspCode == "100"){
+                            setTimeout(function () {
+                                let $count = $star.text();
+                                $count++;
+                                $star.text($count);
+                                $status.attr("class","layui-icon layui-icon-rate-solid");
+                                $load.prop("hidden",true);
+                                $btn.prop("disabled",false);
+                            },600);
+                        }
+                        else if(msg.rspCode == "104"){
+                            swal({
+                                    title: "操作失败！",
+                                    text: "该文章已经不存在",
+                                    type: "error",
+                                    showConfirmButton:"true",
+                                    confirmButtonText:"确定"},
+                                function () {
+                                    window.location.reload();
+                                });
+                        }
+                    }).error(function () {
+                        window.location.reload();
+                    });
+                }else{
+                    $.post("/manager/loseStar",$form.serialize(),function (msg) {
+                        if(msg.rspCode == "100"){
+                            setTimeout(function () {
+                                let $count = $star.text();
+                                $count--;
+                                $star.text($count);
+                                $status.attr("class","layui-icon layui-icon-rate");
+                                $load.prop("hidden",true);
+                                $btn.prop("disabled",false);
+                            },600);
+                        }
+                        else if(msg.rspCode == "104"){
+                            swal({
+                                    title: "操作失败！",
+                                    text: "该文章已经不存在",
+                                    type: "error",
+                                    showConfirmButton:"true",
+                                    confirmButtonText:"确定"},
+                                function () {
+                                    window.location.reload();
+                                });
+                        }
+                    }).error(function () {
+                        window.location.reload();
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div th:if="${folderName != '未分类' || !isMe}" style="padding: 18px;background-color: white">
+    <h3>
+        <span style="color: #398439" th:if="${!isMe}" th:text="${nickname} + ' ' + '的文件夹：'"></span>
+        <span style="color: #0b3275;" th:text="${folderName}"></span>
+        <span style="color: #0fb391;font-size: medium" th:text="'(' + ${articleTotal} + ')'"></span>&nbsp;&nbsp;
+        <span th:if="${isMe}" class="title-small clickable icon-pencil mr-sm" data-toggle="modal" data-target="#modal-editFolderName" style="color: green;font-size: 16px;cursor:pointer"></span>
+        <div th:if="${isMe}" class="float-lg-right">
+            <span class="title-small icon-folder-alt mr-sm" style="color: green;font-size: 16px;"></span>
+            <span data-toggle="modal" data-target="#modal-delFolder" class="title-small clickable" style="color: green;font-size: 16px;cursor:pointer">删除</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
+    </h3>
+</div><br>
+<div class="col-xs-12 text-center" th:if="${folderName != '未分类' && articleTotal == 0}">
+    <img src="/manager/images/empty_list.png" class="mt shaozi-mobile-qrcode"/>
+    <h3 style="color:#aaaaaa" class="mt text-thin">此收藏夹为空</h3>
+</div>
+<div th:if="${folderName == '未分类' && articleTotal == 0}" class="col-xs-12 text-center">
+    <h2 class="text-thin" style="color: #656565">未读列表是空的</h2><br>
+    <p>您的收藏都整洁有序，恭喜您！</p>
+</div>
+<br><br>
+<div class="row tm-section-mb">
+    <div class="col-lg-12">
+        <div class="tm-timeline-item" th:each="article,x:${articles}">
+            <div class="tm-timeline-connector-vertical" th:if="${x.index != 0}"></div>
+            <div class="tm-timeline-item-inner">
+                <img th:src="${portraitPath}" alt="Image" class="rounded-circle tm-img-timeline">
+                <div class="tm-timeline-connector">
+                    <p class="mb-0">&nbsp;</p>
+                </div>
+                <div class="Border tm-timeline-description" style="width: 1000px;background-color: white;">
+                    <div class="float-right" th:if="${isMe}">
+                        <span data-toggle="modal" data-target="#modal-config" style="color: green;cursor:pointer" class="fa fa-cog go fa-2x fa-fw fa-pulse" aria-hidden="true"></span>
+                    </div>
+                    <a th:text="${article.title}" th:href="${article.url}" target="_blank"></a>&nbsp;
+                    <span th:if="${article.isPrivate()}" style="color: #BA55D3;font-size: 20px;font-weight: bold" class="layui-icon layui-icon-password"></span><br><br>
+                    <p th:text="${article.description}"></p><br>
+                    <p class="tm-text-green float-right mb-0" th:text="${article.myDate.year} + ' ' + ${article.myDate.mouth} + ' ' + ${article.myDate.day}"></p>
+                    <br><br>
+                    <p class="float-left mb-0">
+                        <span class="icon-folder" style="font-weight: bold;font-size: 20px;vertical-align: middle"></span>
+                        <span style="vertical-align: middle"><span class="currentFolderName" th:text="${folderName}" style="font-size: 15px;font-weight: bolder;color: blueviolet"></span></span>
+                    </p>
+                    <br><br>
+                    <p class="float-right mb-0" style="color: blueviolet;font-weight: bold">
+                        <span class="layui-icon layui-icon-loading-1 layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 20px;font-weight: bold;color: red" hidden></span>
+                        <button type="button" class="btn btn-outline-info btn-md submit">
+                            <span th:class="${isStars.get(x.index) ? 'layui-icon layui-icon-rate-solid' : 'layui-icon layui-icon-rate'}" aria-hidden="true" style="color: black">Star</span>&nbsp;
+                            <span style="color: blueviolet" th:text="${article.likeTotal}"></span>
+                        </button>
+                    </p>
+                    <form>
+                        <input name="nickname" th:value="${nickname}" hidden>
+                        <input name="url" th:value="${article.url}" hidden>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:if="${isMe}" class="modal fade" id="modal-editFolderName" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: #656565;font-weight: bold">修改收藏夹名</h3>
+                <button type="button" class="close" data-dismiss="modal" style="outline:none;">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="newFolderName" name="newFolderName" placeholder="新收藏夹名" style="caret-color:black;padding-left: 15px;" class="layui-icon layui-icon-edit" required/>
+                <span id="error" style="color: red"></span>
+            </div>
+            <div class="modal-footer">
+                <button id="updateFolderName" class="btn btn-block btn-outline-success mt-lg">确定</button>
+            </div>
+            <input name="folderName" th:value="${folderName}" hidden>
+        </div>
+    </div>
+</div>
+
+<div th:if="${isMe}" class="modal fade" id="modal-delFolder" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: #656565;font-weight: bold">删除收藏夹</h3>
+                <button type="button" class="close" data-dismiss="modal" style="outline:none;">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>删除收藏夹将删除该收藏下所有收藏，且无法找回，是否继续？</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light mt-lg" data-dismiss="modal" style="background-color: #f0f0f0">取消</button>
+                <button id="delFolder" class="btn btn-danger mt-lg">确定</button>
+            </div>
+            <input name="folderName" th:value="${folderName}" hidden>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="/manager/js/my.js" th:if="${isMe}"></script>
+<link href="/toastr/toastr.min.css" rel="stylesheet" th:if="${isMe}">
+<script src="/toastr/toastr.min.js" th:if="${isMe}"></script>
+<script type="text/javascript" th:if="${isMe}">
+    $(function () {
+        toastr.options = {
+            'positionClass': 'toast-top-center',
+            'timeOut': '3000',
+        };
+        $("#updateFolderName").click(function () {
+            let name = $("#newFolderName").val();
+            name = name.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+            if(name < 1) $("#error").text("请输入收藏夹名");
+            else{
+                $("#error").text("");
+                $("#updateFolderName").prop("disabled",true);
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    dataType: "json",
+                    url: "/safety/changeFolderName",
+                    data: {name:$("input[name='folderName']").val(),newName:$("#newFolderName").val()},
+                    success: function (msg) {
+                        if(msg.rspCode == "100"){
+                            $("body").find("div:eq(0)").find("h3").find("span:eq(0)").text($("#newFolderName").val());
+                            const folderName = $("#folderName").val();
+                            let $folder = $(window.parent.document.getElementById("LAY_app_tabsheader")).find("li");
+                            let name = $("input[name = 'folderName']").val();
+                            $.each($folder,function () {
+                                if($(this).attr("lay-id") == "/manager/openFolder/" + name ){
+                                    $(this).attr("lay-id","/manager/openFolder/" + $("#newFolderName").val());
+                                    $(this).attr("lay-attr","/manager/openFolder/" + $("#newFolderName").val());
+                                    $(this).find("span:eq(0)").html($("#newFolderName").val());
+                                    return false;
+                                }
+                            });
+                            $.each($(".currentFolderName"),function (i,val) {
+                                $(this).text($("#newFolderName").val());
+                            });
+                            toastr.success("收藏夹更名成功！", "操作成功");
+                            $("#modal-editFolderName").find("div").find("div").find("input[name = 'folderName']").val($("#newFolderName").val());
+                            $("#modal-editFolderName").modal("hide");
+                            refreshFolders();
+                        }
+                        else if(msg.rspCode == "101"){
+                            toastr.error("该收藏夹已被创建", "操作失败！");
+                        }
+                    },
+                    error: function () {
+                        window.location.reload();
+                    }
+                });
+                setTimeout(function () {
+                    $("#updateFolderName").prop("disabled",false);
+                },600);
+            }
+        });
+
+        $("#delFolder").click(function () {
+            $.ajax({
+                async: false,
+                type: "POST",
+                dataType: "json",
+                url: "/safety/delFolder",
+                data: {folderName: $("input[name = 'folderName']").val()},
+                success: function (msg) {
+                    if(msg.rspCode == "100"){
+                        toastr.success("收藏夹删除成功！", "操作成功");
+                        let $folder = $(window.parent.document.getElementById("LAY_app_tabsheader")).find("li");
+                        let name = $("input[name = 'folderName']").val();
+                        $.each($folder,function () {
+                            if($(this).attr("lay-id") == "/manager/openFolder/" + name ){
+                                $(this).remove();
+                                return false;
+                            }
+                        });
+                        refreshFolders();
+                        window.parent.document.getElementById("theHome").click();
+                        let $body = $(window.parent.document.getElementById("LAY_app_body")).find("div");
+                        $.each($body,function () {
+                            if($(this).find("iframe").attr("src") == "/manager/openFolder/" + name){
+                                $(this).remove();
+                                return false;
+                            }
+                        });
+                    }
+                },
+                error: function () {
+                  window.top.location.href = "/400";
+                }
+            });
+        });
+    });
+</script>
+
+<div class="modal hide fade" id="modal-config" tabindex="-1" role="dialog" th:if="${isMe}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span style="color: black;" class="fa fa-cog fa-2x fa-fw fa-spin"></span>
+                <button type="button" class="close" data-dismiss="modal" style="outline:none;">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <button id="edit" style="width: 190px" class="btn btn-outline-info btn-md mt-lg" data-toggle="modal" data-target="#modal-edit">
+                    <i style="color: yellowgreen" class="fa fa-paint-brush fa-lg fa-fw"></i>
+                    修改收藏信息
+                </button>&nbsp;&nbsp;
+                <button id="del" style="width: 190px" class="btn btn-outline-danger btn-md mt-lg">
+                    <i style="color: red" class="fa fa-trash-o fa-lg fa-fw"></i>
+                    删除收藏
+                </button>
+                &nbsp;&nbsp;<button class="btn btn-outline-secondary btn-md mt-lg" data-dismiss="modal">取消</button>
+            </div>
+        </div>
+    </div>
+    <form id="collection" target="myIframe" method="post">
+        <input name="url" hidden>
+        <input name="title" hidden>
+        <input name="description" hidden>
+        <input name="folderName" hidden>
+        <input name="isPrivate" hidden>
+    </form>
+</div>
+
+<div class="modal hide fade" id="modal-edit" tabindex="-1" role="dialog" th:if="${isMe}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span style="color: black;" class="fa fa-cog fa-2x fa-fw fa-spin"></span>
+                <button type="button" class="close" data-dismiss="modal" style="outline:none;">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 505px">
+                <iframe id="myIframe" name="myIframe" width="100%" height="100%" frameborder="0" scrolling="no" allowtransparency="yes"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" th:if="${isMe}">
+
+    $(function () {
+        $("#edit").click(function () {
+            $("#collection").attr("action","/safety/editCollection");
+            $("#collection").submit();
+            $("#modal-config").modal('toggle');
+        });
+        $("#del").click(function () {
+            swal({
+                    title: "确认删除？",
+                    text: "一旦删除，该收藏将无法找回",
+                    type: "warning",
+                    showConfirmButton:"true",
+                    confirmButtonText:"确定",
+                    showCancelButton: "true",
+                    cancelButtonText:"取消"
+                },
+                function () {
+                    $.ajax({
+                        async: false,
+                        type: "POST",
+                        dataType: "json",
+                        data: $("#collection").serialize(),
+                        url: "/safety/delCollection",
+                        success: function () {
+                            window.parent.location.reload();
+                        },
+                        error: function () {
+                            window.top.location.href = "/500";
+                        }
+                    });
+                });
+        });
+        $(".go").click(function () {
+            let $this = $(this);
+            $.ajax({
+                async: false,
+                type: "POST",
+                dataType: "json",
+                url: "/safety/getArticle",
+                data: {
+                    url: $this.parent().parent().find("input[name = 'url']").val()
+                },
+                success: function (msg) {
+                    if(msg.rspCode == "104") {
+                        swal({
+                                title: "操作失败！",
+                                text: "该文章已经不存在",
+                                type: "error",
+                                showConfirmButton:"true",
+                                confirmButtonText:"确定"},
+                            function () {
+                                window.location.reload();
+                            });
+                    }
+                    $("#collection").find("input[name = url]").val(msg.url);
+                    $("#collection").find("input[name = title]").val(msg.title);
+                    $("#collection").find("input[name = description]").val(msg.description);
+                    $("#collection").find("input[name = folderName]").val(msg.folderName);
+                    $("#collection").find("input[name = isPrivate]").val(msg.isPrivate);
+                },
+                error: function () {
+                    window.top.location.reload();
+                }
+            });
+        });
+    });
+</script>
+</html>

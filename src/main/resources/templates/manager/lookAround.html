@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" type="text/css" href="https://www.huangwx.cn/css/sweetalert.css">
+    <script type="text/javascript" src="https://www.huangwx.cn/js/sweetalert-dev.js"></script>
+
+    <link href="/manager/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/manager/css/templatemo-style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/manager/css/simple-line-icons.css">
+    <link href="/manager/css/layui.css" rel="stylesheet">
+    <script src="/index/js/jquery-1.7.2.js"></script>
+    <style type="text/css">
+        body{
+            background-color: ghostwhite;
+        }
+        a:link,a:visited{
+            color: #000080;
+            text-decoration:none;
+        }
+        a:hover {
+            color: #FF5722;
+            text-decoration:none;
+        }
+        a{
+            font-weight: bold;
+            font-size: 23px;
+        }
+        .Border{
+            border:1px solid #92B0DD;
+        }
+        p{
+            color: #656565;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            $(".lookFolder").click(function () {
+                let $this = $(this);
+                let q = true;
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    dataType: "json",
+                    url: "/manager/isExistFolder",
+                    data: {nickname: $this.parent().parent().parent().find("input[name = 'nickname']").val(),folderName: $this.text()},
+                    success: function (msg) {
+                        if(msg.rspCode != "100"){
+                            q = false;
+                            swal({
+                                    title: "操作失败！",
+                                    text: "该收藏夹已经不存在",
+                                    type: "error",
+                                    showConfirmButton:"true",
+                                    confirmButtonText:"确定"},
+                                function () {
+                                    window.location.reload();
+                                });
+                        }
+                    },
+                    error: function () {
+                        window.top.location.href = "/500";
+                    }
+                });
+                return q;
+            });
+            $(".btn").click(function () {
+                const $btn = $(this);
+                const $load = $(this).parent().find("span:eq(0)");
+                $load.prop("hidden",false);
+                $btn.prop("disabled",true);
+                const $form = $btn.parent().parent().find("form:eq(0)");
+                let $status = $btn.find("span:eq(0)");
+                let $star = $btn.find("span:eq(1)");
+                if($status.attr("class") == "layui-icon layui-icon-rate"){
+                    $.post("/manager/getStar",$form.serialize(),function (msg) {
+                        if(msg.rspCode == "100"){
+                            setTimeout(function () {
+                                let $count = $star.text();
+                                $count++;
+                                $star.text($count);
+                                $status.attr("class","layui-icon layui-icon-rate-solid");
+                                $load.prop("hidden",true);
+                                $btn.prop("disabled",false);
+                            },600);
+                        }
+                        else if(msg.rspCode == "104"){
+                            swal({
+                                    title: "操作失败！",
+                                    text: "该文章已经不存在",
+                                    type: "error",
+                                    showConfirmButton:"true",
+                                    confirmButtonText:"确定"},
+                                function () {
+                                    window.location.reload();
+                                });
+                        }
+                    }).error(function () {
+                        window.location.reload();
+                    });
+                }else{
+                    $.post("/manager/loseStar",$form.serialize(),function (msg) {
+                        if(msg.rspCode == "100"){
+                            setTimeout(function () {
+                                let $count = $star.text();
+                                $count--;
+                                $star.text($count);
+                                $status.attr("class","layui-icon layui-icon-rate");
+                                $load.prop("hidden",true);
+                                $btn.prop("disabled",false);
+                            },600);
+                        }
+                        else if(msg.rspCode == "104"){
+                            swal({
+                                    title: "操作失败！",
+                                    text: "该文章已经不存在",
+                                    type: "error",
+                                    showConfirmButton:"true",
+                                    confirmButtonText:"确定"},
+                                function () {
+                                    window.location.reload();
+                                });
+                        }
+                    }).error(function () {
+                        window.location.reload();
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div th:if="${!isMe}" style="padding: 18px;background-color: white">
+    <h3>
+        <span style="color: #398439" th:if="${!isMe}" th:text="${nicknames.get(0)} + ' ' + '的空间'"></span>
+    </h3>
+</div>
+<br><br>
+<div class="row tm-section-mb">
+    <div class="col-lg-12">
+        <div class="tm-timeline-item" th:each="article,x:${articles}">
+            <div class="tm-timeline-connector-vertical" th:if="${x.index != 0}"></div>
+            <div class="tm-timeline-item-inner">
+                <img th:src="${nickname != null ? portraitPaths.get(0) : portraitPaths.get(x.index)}" alt="Image" class="rounded-circle tm-img-timeline">
+                <div class="tm-timeline-connector">
+                    <p class="mb-0">&nbsp;</p>
+                </div>
+                <div class="Border tm-timeline-description" style="width: 1000px;background-color: white;">
+                    <a th:if="${nickname == null}" th:lay-href="'/manager/lookAround/' + ${nickname != null ? nickname : nicknames.get(x.index)}" th:text="${nickname != null ? nicknames.get(0) : nicknames.get(x.index)}" style="cursor:pointer;font-weight: bolder;font-size: 18px;color: #1E9FFF" class="layui-icon layui-icon-username"></a><br th:if="${nickname == null}"><br th:if="${nickname == null}">
+                    <a th:text="${article.title}" th:href="${article.url}" target="_blank"></a>&nbsp;<br><br>
+                    <p th:text="${article.description}"></p><br>
+                    <p class="tm-text-green float-right mb-0" th:text="${article.myDate.year} + ' ' + ${article.myDate.mouth} + ' ' + ${article.myDate.day}"></p>
+                    <br><br>
+                    <p class="float-left mb-0">
+                        <span class="icon-folder" style="font-weight: bold;font-size: 20px;vertical-align: middle"></span>
+                        <span style="vertical-align: middle"><a class="lookFolder" href="" th:text="${foldersName.get(x.index)}" th:lay-href="'/manager/openFolder/' + ${nickname != null ? nickname : nicknames.get(x.index)} + '/' + ${foldersName.get(x.index)}" style="font-size: 15px;font-weight: bolder"></a></span>
+                    </p>
+                    <br><br>
+                    <p class="float-right mb-0" style="color: blueviolet;font-weight: bold">
+                        <span class="layui-icon layui-icon-loading-1 layui-anim layui-anim-rotate layui-anim-loop" style="font-size: 20px;font-weight: bold;color: red" hidden></span>
+                        <button type="button" class="btn btn-outline-info btn-md">
+                            <span th:class="${isStars.get(x.index) ? 'layui-icon layui-icon-rate-solid' : 'layui-icon layui-icon-rate'}" aria-hidden="true" style="color: black">Star</span>&nbsp;
+                            <span style="color: blueviolet" th:text="${article.likeTotal}"></span>
+                        </button>
+                    </p>
+                    <form>
+                        <input name="nickname" th:value="${nickname != null ? nicknames.get(0) : nicknames.get(x.index)}" hidden>
+                        <input name="url" th:value="${article.url}" hidden>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/manager/js/layui.js"></script>
+<script>
+    document.onselectstart= function(event){return false;};
+    layui.config({
+        base: '/manager/' //静态资源所在路径
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use('index');
+</script>
+</body>
+</html>
