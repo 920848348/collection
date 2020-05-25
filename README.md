@@ -81,9 +81,9 @@
 
 1、克隆并使用 IDEA 或 eclipse 打开 maven 项目。
 
-2、先将 application.properties 配置文件中的模式改为 dev 模式。
+2、先将 application.yml 配置文件中的模式改为 dev 模式。
 
-3、修改其 application-dev.properties 配置文件的数据库用户名密码等配置。
+3、修改其 application-dev.yml 配置文件的数据库用户名密码等配置。
 
 4、在数据库中创建一个名为 collection 的数据库。
 
@@ -156,8 +156,10 @@ SET FOREIGN_KEY_CHECKS = 1;
 ```
 
 
+### 您可能需要做以下更改：
 
-头像的默认路径为：电脑 F 盘的 pictures 文件夹下（见 WebMvcConfig.java的资源处理器）。
-
-默认头像为 F:\pictures\1\user.png （见 application-dev.properties 路径配置）
+1、头像的默认路径为：电脑 F 盘的 pictures 文件夹下（见 WebMvcConfig.java的资源处理器）。<br>
+2、默认头像为 F:\pictures\1\user.png （见 application-dev.yml 路径配置）。<br>
+3、对于邮件协议，需在配置文件中修改邮件名、smtp密码等配置。<br>
+4、druid后台账号密码需在 DruidConfig类 中更改。
 
