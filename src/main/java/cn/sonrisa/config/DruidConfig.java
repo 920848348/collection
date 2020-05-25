@@ -29,8 +29,9 @@ public class DruidConfig {
         Map<String,String> initParameters = new HashMap<>();
 
         //增加配置
+        //可根据需求修改用户名和密码
         initParameters.put("loginUsername","root");
-        initParameters.put("loginPassword","sonrisa345");
+        initParameters.put("loginPassword","root");
 
         statViewServletServletRegistrationBean.setInitParameters(initParameters);
         return statViewServletServletRegistrationBean;
