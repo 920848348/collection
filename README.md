@@ -14,7 +14,6 @@
 
 - Springboot ​ 框架
 - Mybatis  框架
-- Thymeleaf  模板引擎
 - Mysql  数据库
 - Shiro  安全框架
 
@@ -22,6 +21,7 @@
 
 ### 前端：
 
+- Thymeleaf  模板引擎
 - jQuery 框架
 - 使用 BootStrap 、layui 框架进行页面渲染
 - 部分图标使用于 Fontawesome 图标库
