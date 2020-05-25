@@ -1,7 +1,8 @@
 spring:
     datasource:
-        username: root
-        password: root
+    #数据库用户名、密码，数据库名称(collection)按需求应要改写
+        username: xxxx
+        password: xxxx
         url: jdbc:mysql://localhost:3306/collection?serverTimezone=UTC&useUncide=true&characterEncoding=utf-8&useSSL=true
         driver-class-name: com.mysql.cj.jdbc.Driver
         type: com.alibaba.druid.pool.DruidDataSource
@@ -38,9 +39,11 @@ spring:
         encoding: utf-8
 
     mail:
+    #根据163、qq等邮箱，更改为 smtp.163.com / smtp.qq.com
         host: smtp.qq.com
-        username: sonrisa_collection@qq.com
-        password: pvpvptbsyhkqdfch
+         #邮箱账号(需更改)
+        username: xxxxxx@qq.com
+        password: #smtp开启时的邮箱密码(需更改)
         port: 465
         protocol: smtp
         default-encoding: UTF-8
@@ -57,6 +60,9 @@ mybatis:
     configuration:
         map-underscore-to-camel-case: true #开启驼峰命名
 
+#头像本地存放路径
 staticPath: "F:\\pictures\\"
+#设置通过 url 访问时的头像路径(通过配置资源处理器，见WebMvcConfig类)
 mavenPath: "/images/"
+#默认头像
 commonHeadPortraitPath: "F:\\pictures\\1\\user.png"
