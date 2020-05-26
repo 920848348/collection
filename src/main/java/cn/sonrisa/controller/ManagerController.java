@@ -156,7 +156,7 @@ public class ManagerController extends BaseController{
         }
         model.addAttribute("articles",articles);
         model.addAttribute("isStars",isStars);
-        model.addAttribute("username",BasicUtils.getCurrentUsername());
+        model.addAttribute("nickname",BasicUtils.getCurrentNickname());
         model.addAttribute("articleTotal",articles.size());
         model.addAttribute("isMe",true);
         model.addAttribute("portraitPath",userService.getPortraitPath(BasicUtils.getCurrentUserId()));
