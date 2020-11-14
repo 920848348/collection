@@ -6,7 +6,7 @@
 
 
 
-<a href="http://121.36.29.161/">项目地址</a> &nbsp;<a href="https://gitee.com/z920848348/collection">码云链接</a>&nbsp;<a href="https://github.com/920848348/collection/">github链接</a>
+<a href="http://101.132.237.172/">项目地址</a> &nbsp;<a href="https://gitee.com/z920848348/collection">码云链接</a>&nbsp;<a href="https://github.com/920848348/collection/">github链接</a>
 
 ##  所涉及技术
 
